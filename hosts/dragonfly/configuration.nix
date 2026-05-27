@@ -2,18 +2,25 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
-let 
-	unstable = import <nixos-unstable> {
-		system = "x86_64-linux";
-		config.allowUnfree = true;
-	};	
-in {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+let
+  unstable = import <nixos-unstable> {
+    system = "x86_64-linux";
+    config.allowUnfree = true;
+  };
+in
+{
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+    ./hardware.nix
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -34,9 +41,15 @@ in {
   nix.distributedBuilds = true;
 
   nix.settings = {
-  	builders-use-substitutes = true;
-	experimental-features = [ "nix-command" "flakes" ];
-	trusted-users = ["root" "deanvlue"];
+    builders-use-substitutes = true;
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+    trusted-users = [
+      "root"
+      "deanvlue"
+    ];
   };
 
   # Set your time zone.
@@ -58,10 +71,9 @@ in {
   services.xserver.enable = true;
   services.xserver = {
     windowManager.qtile.enable = true;
-    
+
   };
   services.displayManager.defaultSession = "qtile";
- 
 
   # Configure keymap in X11
   services.xserver.xkb.layout = "jp";
@@ -92,12 +104,13 @@ in {
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.deanvlue= {
+  users.users.deanvlue = {
     isNormalUser = true;
-    extraGroups = [ 
-      "wheel"             # Enable ‘sudo’ for the user.
-      "networkManager"    # Enable network manager
-    ];     packages = with pkgs; [
+    extraGroups = [
+      "wheel" # Enable ‘sudo’ for the user.
+      "networkManager" # Enable network manager
+    ];
+    packages = with pkgs; [
       tree
     ];
     shell = pkgs.zsh;
@@ -108,90 +121,89 @@ in {
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
   environment.systemPackages = with pkgs; [
-   vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-   wget
-   curl
-   neovim
-
+    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    wget
+    curl
+    neovim
 
     # Apps
     wezterm
     btop
 
-   # Core build tools
-   gcc
-   clang
-   llvm
-   gnumake
-   cmake
-   pkg-config
-   mold # fast linker
-   binutils
-   patchelf
+    # Core build tools
+    gcc
+    clang
+    llvm
+    gnumake
+    cmake
+    pkg-config
+    mold # fast linker
+    binutils
+    patchelf
 
-   # Rust
-   rustup
-   bacon
-   cargo-watch
-   cargo-edit
-   cargo-audit
-   cargo-deny
-   rust-analyzer
-   
-   # C/C++ libraries often needed by Rust
-   openssl
-   openssl.dev
-   zlib
-   sqlite
-   sqlite.dev
+    # Rust
+    rustup
+    bacon
+    cargo-watch
+    cargo-edit
+    cargo-audit
+    cargo-deny
+    rust-analyzer
 
-   # Python
-   python3
-   uv # python package manager
+    # C/C++ libraries often needed by Rust
+    openssl
+    openssl.dev
+    zlib
+    sqlite
+    sqlite.dev
 
-   # Git / networking
-   git
-   gh
-   curl
-   wget
-   jq
-   yq-go
+    # Python
+    python3
+    uv # python package manager
 
-   # CLI Tooling
-   ripgrep
-   fd
-   fzf
-   eza
-   zoxide
-   tealdeer
-   ugrep
-   tree
-   unzip
-   zip
-   
-   # Docker
-   docker-compose
-   podman-compose
-   podman
-   buildah
-   skopeo
-   dive           # inspect image layers
+    # Git / networking
+    git
+    gh
+    curl
+    wget
+    jq
+    yq-go
 
-   # Kubernetes
-   kubectl
-   k9s
-   helm
-   kustomize
+    # CLI Tooling
+    ripgrep
+    fd
+    fzf
+    eza
+    zoxide
+    tealdeer
+    ugrep
+    tree
+    unzip
+    zip
 
-   # Debugging
-   gdb
-   lldb
-   strace
-   ltrace
-   tcpdump
-   dig
-   nmap
-   file 
+    # Docker
+    docker-compose
+    podman-compose
+    podman
+    buildah
+    skopeo
+    dive # inspect image layers
+
+    # Kubernetes
+    kubectl
+    k9s
+    helm
+    kustomize
+
+    # Debugging
+    gdb
+    lldb
+    strace
+    ltrace
+    tcpdump
+    dig
+    nmap
+    file
 
     # Virtualization
     qemu_kvm
@@ -201,11 +213,10 @@ in {
     spice
     spice-gtk
     spice-vdagent
-    swtpm         # TPM for Win11 machines
-    OVMFFull      # UEFI Firmware
+    swtpm # TPM for Win11 machines
+    OVMFFull # UEFI Firmware
     guestfs-tools
     cloud-utils
-
 
   ];
 
@@ -265,21 +276,21 @@ in {
 
   programs.virt-manager.enable = true;
   users.groups = {
-    libvirtd.members = ["deanvlue"];
-    kvm.members = ["deanvlue"];
+    libvirtd.members = [ "deanvlue" ];
+    kvm.members = [ "deanvlue" ];
   };
-  
+
   programs.nix-ld.enable = true;
 
   programs.dconf.enable = true;
 
   fonts.packages = with pkgs; [
-   noto-fonts
-   noto-fonts-color-emoji
-   nerd-fonts.hack
-   nerd-fonts._0xproto
-   nerd-fonts.jetbrains-mono
-   nerd-fonts.symbols-only
+    noto-fonts
+    noto-fonts-color-emoji
+    nerd-fonts.hack
+    nerd-fonts._0xproto
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.symbols-only
   ];
 
   programs.bash = {
@@ -287,30 +298,35 @@ in {
       ll = "eza -lah";
       ls = "eza -lh";
     };
-     interactiveShellInit = ''
-        bind '"\e[A": history-search-backward'
-        bind '"\e[B": history-search-forward'
-      '';
+    interactiveShellInit = ''
+      bind '"\e[A": history-search-backward'
+      bind '"\e[B": history-search-forward'
+    '';
   };
 
-    nix.buildMachines = [
-      {
-        hostName = "192.168.100.77";
-        sshUser = "deploy";
-        sshKey = "/root/.ssh/id_ed25519";
-        system = "x86_64-linux";
-        maxJobs = 4;
-        speedFactor = 2;
-        supportedFeatures = [ "nixos-test" "benchmark" "big-parallel" "kvm" ];
-        mandatoryFeatures = [ ];
-      }
-    ];
+  nix.buildMachines = [
+    {
+      hostName = "192.168.100.77";
+      sshUser = "deploy";
+      sshKey = "/root/.ssh/id_ed25519";
+      system = "x86_64-linux";
+      maxJobs = 4;
+      speedFactor = 2;
+      supportedFeatures = [
+        "nixos-test"
+        "benchmark"
+        "big-parallel"
+        "kvm"
+      ];
+      mandatoryFeatures = [ ];
+    }
+  ];
 
-# Enable ZSH
+  # Enable ZSH
 
-programs.zsh.enable = true;
+  programs.zsh.enable = true;
 
-security.rtkit.enable = true;
+  security.rtkit.enable = true;
 
   services.pulseaudio.enable = false;
 
@@ -321,7 +337,5 @@ security.rtkit.enable = true;
     pulse.enable = true;
     jack.enable = true;
   };
-
-
 
 }

@@ -44,6 +44,7 @@
     tmux
     supercollider
     tmux-mem-cpu-load
+    feh
   ];
 
   programs.wezterm = {
