@@ -26,10 +26,8 @@ in
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Use latest kernel.
-  # boot.kernelPackages = pkgs.linuxPackages_latest;
-  # Use stable kernel in unstable nixos branch - cm
-  boot.kernelPackages = unstable.linuxPackages_latest;
+  # Use low-latency Zen kernel.
+  boot.kernelPackages = pkgs.linuxPackages_zen;
 
   networking.hostName = "dragonfly"; # Define your hostname.
   # networking.wireless.enable = true; # wireless support with wpa_supplicant
