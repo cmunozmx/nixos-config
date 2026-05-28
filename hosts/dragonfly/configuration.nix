@@ -1,21 +1,18 @@
 # Edit this configuration file to define what should be installed on
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
-
 {
   config,
   lib,
   pkgs,
+  inputs,
   ...
-}:
-
-let
+}: let
   unstable = import <nixos-unstable> {
     system = "x86_64-linux";
     config.allowUnfree = true;
   };
-in
-{
+in {
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
@@ -28,6 +25,13 @@ in
 
   # Use low-latency Zen kernel.
   boot.kernelPackages = pkgs.linuxPackages_zen;
+
+  # Boot splash
+  boot.plymouth.enable = true;
+  boot.kernelParams = [
+    "quiet"
+    "splash"
+  ];
 
   networking.hostName = "dragonfly"; # Define your hostname.
   # networking.wireless.enable = true; # wireless support with wpa_supplicant
@@ -69,7 +73,6 @@ in
   services.xserver.enable = true;
   services.xserver = {
     windowManager.qtile.enable = true;
-
   };
   services.displayManager.defaultSession = "qtile";
 
@@ -110,11 +113,23 @@ in
     ];
     packages = with pkgs; [
       tree
+      # Hyperland
+      rofi
+      thunar
+      swaybg
     ];
     shell = pkgs.zsh;
   };
 
   programs.firefox.enable = true;
+
+  programs.hyprland = {
+    enable = true;
+    xwayland.enable = true;
+    package = inputs.hyprland.packages.${pkgs.system}.hyprland;
+    portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
+
+  }
 
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
@@ -215,7 +230,6 @@ in
     OVMFFull # UEFI Firmware
     guestfs-tools
     cloud-utils
-
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -274,8 +288,8 @@ in
 
   programs.virt-manager.enable = true;
   users.groups = {
-    libvirtd.members = [ "deanvlue" ];
-    kvm.members = [ "deanvlue" ];
+    libvirtd.members = ["deanvlue"];
+    kvm.members = ["deanvlue"];
   };
 
   programs.nix-ld.enable = true;
@@ -316,7 +330,7 @@ in
         "big-parallel"
         "kvm"
       ];
-      mandatoryFeatures = [ ];
+      mandatoryFeatures = [];
     }
   ];
 
@@ -336,4 +350,6 @@ in
     jack.enable = true;
   };
 
+  # Hyperland config
+  services.displayManager.ly.enable = true;
 }

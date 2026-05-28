@@ -45,6 +45,8 @@
     supercollider
     tmux-mem-cpu-load
     feh
+    nil
+    alejandra
   ];
 
   programs.wezterm = {
@@ -79,6 +81,9 @@
       share = true;
     };
     initContent = ''
+      unset TERMINFO
+      export TERMINFO_DIRS="$HOME/.nix-profile/share/terminfo:/etc/profiles/per-user/$USER/share/terminfo:/run/current-system/sw/share/terminfo"
+
       eval "$(fnm env --use-on-cd)"
       bindkey "^[[A" history-beginning-search-backward
       bindkey "^[[B" history-beginning-search-forward
