@@ -20,8 +20,12 @@ in {
   ];
 
   # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot = {
+  	enable = true;
+	configurationLimit = 7;
+  };
   boot.loader.efi.canTouchEfiVariables = true;
+  
 
   # Use low-latency Zen kernel.
   boot.kernelPackages = pkgs.linuxPackages_zen;
@@ -110,6 +114,7 @@ in {
     extraGroups = [
       "wheel" # Enable ‘sudo’ for the user.
       "networkManager" # Enable network manager
+      "audio"
     ];
     packages = with pkgs; [
       tree
@@ -128,8 +133,7 @@ in {
     xwayland.enable = true;
     package = inputs.hyprland.packages.${pkgs.system}.hyprland;
     portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
-
-  }
+  };
 
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
@@ -142,6 +146,7 @@ in {
     # Apps
     wezterm
     btop
+    uwsm
 
     # Core build tools
     gcc
@@ -244,6 +249,11 @@ in {
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
+
+  programs.ssh.knownHosts.nix-builder-192-168-100-77 = {
+  	hostNames = [ "192.168.100.77" ];
+        publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINJ96dKpnfwv+5bw6aPVix4AE4PipjV7VXyr19o4IK7c";
+	};
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
@@ -348,6 +358,7 @@ in {
     alsa.enable = true;
     pulse.enable = true;
     jack.enable = true;
+    wireplumber.enable = true;
   };
 
   # Hyperland config

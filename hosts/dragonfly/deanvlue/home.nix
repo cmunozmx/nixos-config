@@ -42,11 +42,27 @@
     nixfmt-rfc-style
     virt-viewer
     tmux
-    supercollider
+    (symlinkJoin {
+      name = "supercollider-pipewire-jack";
+      paths = [ supercollider ];
+      nativeBuildInputs = [ makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/scide \
+          --set QT_QPA_PLATFORM xcb \
+          --prefix LD_LIBRARY_PATH : ${pipewire.jack}/lib
+        wrapProgram $out/bin/scsynth \
+          --prefix LD_LIBRARY_PATH : ${pipewire.jack}/lib
+        wrapProgram $out/bin/supernova \
+          --prefix LD_LIBRARY_PATH : ${pipewire.jack}/lib
+      '';
+    })
+    pipewire.jack
     tmux-mem-cpu-load
     feh
     nil
     alejandra
+    lua-language-server
+    ffmpeg
   ];
 
   programs.wezterm = {
@@ -208,7 +224,11 @@
     viAlias = true;
     vimAlias = true;
 
-    extraLuaConfig = ''
+    initLua = ''
+      require("config.options")
+      require("config.keybinds")
+      require("manage").setup()
+
       vim.api.nvim_create_autocmd("BufWritePre", {
         pattern = "*.nix",
         callback = function()
