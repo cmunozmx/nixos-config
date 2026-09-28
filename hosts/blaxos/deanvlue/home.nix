@@ -64,136 +64,19 @@
     lua-language-server
     ffmpeg
     foot
+    btop
+    quickshell
+    neovim
+    wezterm
+    starship
+    chezmoi
+    quickshell
   ];
 
-  programs.wezterm = {
-    enable = true;
-    extraConfig = builtins.readFile ./.wezterm.lua;
-  };
-
-  programs.bash = {
-    enable = true;
-    shellAliases = {
-      ll = "eza -lah";
-      ls = "eza -l";
-      g = "git";
-    };
-    initExtra = ''
-      eval "$(fnm env --use-on-cd)"
-      bind '"\e[A": history-search-backward'
-      bind '"\e[B": history-search-forward'
-    '';
-  };
-
-  programs.zsh = {
-    enable = true;
-    shellAliases = {
-      ll = "eza -lah";
-      ls = "eza -l";
-      g = "git";
-    };
-    history = {
-      size = 10000;
-      save = 10000;
-      share = true;
-    };
-    initContent = ''
-      unset TERMINFO
-      export TERMINFO_DIRS="$HOME/.nix-profile/share/terminfo:/etc/profiles/per-user/$USER/share/terminfo:/run/current-system/sw/share/terminfo"
-
-      eval "$(fnm env --use-on-cd)"
-      bindkey "^[[A" history-beginning-search-backward
-      bindkey "^[[B" history-beginning-search-forward
-    '';
-  };
-
-  programs.starship = {
-    enable = true;
-    enableBashIntegration = true;
-    enableZshIntegration = true;
-
-    settings = {
-      add_newline = true;
-      palette = "tokyonight";
-      format = "$directory$git_branch$git_status$nix_shell$nodejs$rust$python$cmd_duration$line_break$character";
-
-      palettes.tokyonight = {
-        blue = "#7aa2f7";
-        cyan = "#7dcfff";
-        fg = "#c0caf5";
-        green = "#9ece6a";
-        orange = "#ff9e64";
-        purple = "#bb9af7";
-        red = "#f7768e";
-        yellow = "#e0af68";
-      };
-
-      directory = {
-        style = "bold blue";
-        truncation_length = 3;
-      };
-
-      git_branch = {
-        style = "purple";
-        format = "[$symbol$branch]($style) ";
-      };
-
-      git_status = {
-        style = "red";
-        format = "[$all_status$ahead_behind]($style) ";
-      };
-
-      nix_shell = {
-        style = "cyan";
-        format = "[$symbol$state( \\($name\\))]($style) ";
-      };
-
-      nodejs = {
-        style = "green";
-        format = "[node $version]($style) ";
-      };
-
-      rust = {
-        style = "orange";
-        format = "[rust $version]($style) ";
-      };
-
-      python = {
-        style = "yellow";
-        format = "[py $version]($style) ";
-      };
-
-      cmd_duration = {
-        style = "fg";
-        min_time = 1000;
-        format = "[$duration]($style) ";
-      };
-
-      character = {
-        success_symbol = "[>](bold green)";
-        error_symbol = "[>](bold red)";
-      };
-    };
-  };
-
-  # Home Manager is pretty good at managing dotfiles. The primary way to manage
-  # plain files is through 'home.file'.
-  home.file = {
-    ".gitconfig".source = ./gitconfig;
-    ".tmux.conf".source = ./.tmux.conf;
-    ".wezterm.lua".source = ./.wezterm.lua;
-    ".config/hypr/hyprland.lua".source = ./hyprland.lua;
-    # # Building this configuration will create a copy of 'dotfiles/screenrc' in
-    # # the Nix store. Activating the configuration will then make '~/.screenrc' a
-    # # symlink to the Nix store copy.
-    # ".screenrc".source = dotfiles/screenrc;
-
-    # # You can also set the file content immediately.
-    # ".gradle/gradle.properties".text = ''
-    #   org.gradle.console=verbose
-    #   org.gradle.daemon.idletimeout=3600000
-    # '';
-  };
+  # Dotfiles (shell rc, git, tmux, wezterm, hyprland, nvim, starship) are managed
+  # by chezmoi (~/.local/share/chezmoi), not home-manager. This block only
+  # installs packages and handles session-level/system-integration settings
+  # (GTK theme, dconf, env vars) that aren't really "dotfiles".
 
   # Home Manager can also manage your environment variables through
   # 'home.sessionVariables'. These will be explicitly sourced when using a
@@ -221,55 +104,6 @@
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
-
-  programs.neovim = {
-    enable = true;
-    defaultEditor = true;
-    viAlias = true;
-    vimAlias = true;
-
-    initLua = ''
-      -- These modules live in ~/.config/nvim/lua and aren't managed by Nix;
-      -- skip them when absent instead of aborting startup.
-      local function try_require(name)
-        local ok, mod = pcall(require, name)
-        if ok then
-          return mod
-        end
-        if not tostring(mod):find("module '" .. name .. "' not found", 1, true) then
-          vim.notify(mod, vim.log.levels.ERROR)
-        end
-      end
-
-      try_require("config.options")
-      try_require("config.keybinds")
-      local manage = try_require("manage")
-      if manage then
-        manage.setup()
-      end
-
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        pattern = "*.nix",
-        callback = function()
-          local view = vim.fn.winsaveview()
-          vim.cmd("%!nixfmt -")
-          if vim.v.shell_error ~= 0 then
-            vim.cmd("undo")
-            vim.notify("nixfmt failed", vim.log.levels.ERROR)
-          else
-            vim.fn.winrestview(view)
-          end
-        end,
-      })
-
-      vim.lsp.config("nil_ls", {
-        cmd = { "nil" },
-        filetypes = { "nix" },
-        root_markers = { "flake.nix", ".git" },
-      })
-      vim.lsp.enable("nil_ls")
-    '';
-  };
 
   gtk = {
     enable = true;
