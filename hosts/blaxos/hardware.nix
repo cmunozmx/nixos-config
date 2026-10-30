@@ -18,10 +18,23 @@
   };
 
   services.fwupd.enable = true;
-  services.thermald.enable = true;
 
   powerManagement.enable = true;
   services.power-profiles-daemon.enable = true;
+
+  programs.corectrl.enable = true;
+
+  environment.systemPackages = [
+    pkgs.powertop
+    pkgs.brightnessctl
+  ];
+
+  # Let the "video" group control the screen and keyboard backlights without
+  # sudo (both sysfs nodes are root:root 0644 by default).
+  services.udev.extraRules = ''
+    SUBSYSTEM=="backlight", RUN+="${pkgs.coreutils}/bin/chgrp video $sys$devpath/brightness", RUN+="${pkgs.coreutils}/bin/chmod g+w $sys$devpath/brightness"
+    SUBSYSTEM=="leds", KERNEL=="*::kbd_backlight", RUN+="${pkgs.coreutils}/bin/chgrp video $sys$devpath/brightness", RUN+="${pkgs.coreutils}/bin/chmod g+w $sys$devpath/brightness"
+  '';
 
   boot.kernelModules = [
     "kvm-amd"

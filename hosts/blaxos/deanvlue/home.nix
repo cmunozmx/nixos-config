@@ -70,7 +70,12 @@
     wezterm
     starship
     chezmoi
-    quickshell
+    qt6.qtdeclarative # provides qmlls
+    zed-editor
+    tailscale
+    hyprpaper
+    hyprlock
+    atuin
   ];
 
   # Dotfiles (shell rc, git, tmux, wezterm, hyprland, nvim, starship) are managed
@@ -105,6 +110,73 @@
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
+  services.flatpak = {
+    enable = true;
+    packages = [
+      # "com.spotify.Client"
+      "io.github.getnf.embellish"
+      "io.github.nokse22.minitext"
+      "com.collaboraoffice.Office"
+      "dev.zed.Zed"
+      "app.drey.Warp"
+      "app.getclipboard.Clipboard"
+      "ar.com.tuxguitar.TuxGuitar"
+      "cc.arduino.IDE2"
+      "com.belmoussaoui.Obfuscate"
+      "com.blockstream.Green"
+      "com.calibre_ebook.calibre"
+      "com.exok.Celeste64"
+      "com.github.finefindus.eyedropper"
+      "com.github.hluk.copyq"
+      "com.github.reduz.ChibiTracker"
+      "com.github.tchx84.Flatseal"
+      "com.saivert.pwvucontrol"
+      "com.usebottles.bottles"
+      "com.valvesoftware.Steam"
+      "info.puredata.Pd-extended"
+      "io.github.dimtpap.coppwr"
+      "io.github.dvlv.boxbuddyrs"
+      "io.github.ellie_commons.sequeler"
+      "io.github.flattool.Ignition"
+      "io.github.flattool.Warehouse"
+      "io.github.kolunmi.Bazaar"
+      "io.github.ungoogled_software.ungoogled_chromium"
+      "io.podman_desktop.PodmanDesktop"
+      "org.audacityteam.Audacity"
+      "org.gimp.GIMP"
+      "org.gnome.Calculator"
+      "org.gnome.Calendar"
+      "org.gnome.Characters"
+      "org.gnome.clocks"
+      "org.gnome.Connections"
+      "org.gnome.Contacts"
+      "org.gnome.DejaDup"
+      "org.gnome.FileRoller"
+      "org.gnome.font-viewer"
+      "org.gnome.Fractal"
+      "org.gnome.Logs"
+      "org.gnome.Loupe"
+      "org.gnome.Maps"
+      "org.gnome.NautilusPreviewer"
+      "org.gnome.Papers"
+      "org.gnome.Podcasts"
+      "org.gnome.Snapshot"
+      "org.gnome.TextEditor"
+      "org.gnome.Weather"
+      "org.inkscape.Inkscape"
+      "org.jacktrip.JackTrip"
+      "org.qbittorrent.qBittorrent"
+      "org.raspberrypi.rpi-imager"
+      "org.sqlitebrowser.sqlitebrowser"
+      "org.videolan.VLC"
+    ];
+    uninstallUnmanaged = true; # remove any flatpak not listed here
+    update.auto = {
+      enable = true;
+      onCalendar = "weekly";
+    };
+  };
+
   gtk = {
     enable = true;
     theme = {
@@ -118,6 +190,11 @@
       package = pkgs.adwaita-icon-theme;
     };
 
+    font = {
+      name = "Sans";
+      size = 12;
+    };
+
     gtk3.extraConfig = {
       gtk-application-prefer-dark-theme = true;
     };
@@ -129,5 +206,39 @@
 
   dconf.settings."org/gnome/desktop/interface" = {
     color-scheme = "prefer-dark";
+  };
+
+  qt = {
+    enable = true;
+    platformTheme.name = "qtct";
+    style.name = "adwaita-dark";
+
+    qt5ctSettings.Fonts = {
+      fixed = ''"Sans,12"'';
+      general = ''"Sans,12"'';
+    };
+    qt6ctSettings.Fonts = {
+      fixed = ''"Sans,12"'';
+      general = ''"Sans,12"'';
+    };
+  };
+
+  programs.firefox = {
+    enable = true;
+    profiles.default = {
+      isDefault = true;
+      settings = {
+        "font.size.variable.x-western" = 12;
+        "font.size.monospace.x-western" = 12;
+        "font.minimum-size.variable.x-western" = 12;
+        "layout.css.prefers-color-scheme.content-override" = 0;
+      };
+    };
+    configPath = "${config.xdg.configHome}/mozilla/firefox";
+  };
+
+  xdg.userDirs = {
+    enable = true;
+    createDirectories = true;
   };
 }

@@ -1,0 +1,1 @@
+ssh-ng://nix-builder x86_64-linux - 4 1 kvm,big-parallel - -

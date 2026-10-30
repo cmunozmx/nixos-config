@@ -4,6 +4,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     hyprland.url = "github:hyprwm/Hyprland/v0.55.0";
+    ryoku.url = "github:Ryoku-dev/Ryoku-on-NixOS/main";
 
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -18,6 +19,8 @@
       # Mismatched system dependencies will lead to crashes and other issues.
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
   outputs =
@@ -26,6 +29,8 @@
       nixpkgs,
       hyprland,
       home-manager,
+      nix-flatpak,
+      ryoku,
       ...
     }:
     let
@@ -38,6 +43,9 @@
         modules = [
           ./configuration.nix
           ./hardware-configuration.nix
+          nix-flatpak.nixosModules.nix-flatpak
+          ryoku.nixosModules.default
+          { programs.ryoku.enable = true; }
         ];
       };
 
@@ -48,7 +56,10 @@
           config.allowUnfree = true;
         };
         extraSpecialArgs = { inherit inputs; };
-        modules = [ ./deanvlue/home.nix ];
+        modules = [
+          ./deanvlue/home.nix
+          nix-flatpak.homeManagerModules.nix-flatpak
+        ];
       };
     };
 }

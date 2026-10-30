@@ -2,19 +2,38 @@
 # this and layer their own hardware/DE/package differences on top.
 {
   pkgs,
+  lib,
   inputs,
   ...
 }:
 {
-  nix.settings = {
-    experimental-features = [
-      "nix-command"
-      "flakes"
+  nix = {
+    distributedBuilds = true;
+    buildMachines = [
+      {
+        hostName = "nix-builder";
+        system = "x86_64-linux";
+        protocol = "ssh-ng";
+        sshUser = "nix-builder";
+        sshKey = "/root/.ssh/id_ed25519"; # a key a root can use
+        maxJobs = 4;
+        supportedFeatures = [
+          "big-parallel"
+          "kvm"
+        ];
+      }
     ];
-    trusted-users = [
-      "root"
-      "deanvlue"
-    ];
+    settings = {
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+      trusted-users = [
+        "root"
+        "deanvlue"
+      ];
+      builders-use-substitutes = true;
+    };
   };
 
   boot.loader.systemd-boot = {
@@ -36,6 +55,9 @@
   # Display / audio baseline
   services.xserver.enable = true;
   services.displayManager.ly.enable = true;
+  # Ryoku's sddm default checks services.xserver.displayManager.lightdm.enable,
+  # which in turn defaults based on sddm.enable: pin this to break that cycle.
+  services.displayManager.sddm.enable = false;
 
   security.rtkit.enable = true;
   services.pulseaudio.enable = false;
@@ -69,7 +91,10 @@
     ];
   };
 
-  programs.firefox.enable = true;
+  programs.firefox = {
+    enable = true;
+    policies.Certificates.ImportEnterpriseRoots = true;
+  };
   programs.zsh.enable = true;
   programs.nix-ld.enable = true;
   programs.dconf.enable = true;
@@ -82,6 +107,21 @@
   };
 
   services.openssh.enable = true;
+
+  # Container runtime, available on every host.
+  virtualisation.podman = {
+    enable = true;
+    dockerCompat = true;
+    defaultNetwork.settings.dns_enabled = true;
+  };
+  virtualisation.containers.enable = true;
+  # podman's dockerCompat owns the docker CLI/socket; Ryoku defaults
+  # virtualisation.docker.enable on, which conflicts with that.
+  virtualisation.docker.enable = lib.mkForce false;
+
+  # Flatpak's D-Bus/system helper. The app list itself is managed per-user
+  # via home-manager (see hosts/blaxos/deanvlue/home.nix).
+  services.flatpak.enable = true;
 
   fonts.packages = with pkgs; [
     noto-fonts
@@ -149,6 +189,10 @@
     jq
     yq-go
 
+    # Containers
+    podman
+    podman-compose
+
     # CLI tools
     ripgrep
     fd
@@ -160,4 +204,6 @@
     unzip
     zip
   ];
+
+  security.pki.certificateFiles = [ ./certs/homelab-root.crt ];
 }

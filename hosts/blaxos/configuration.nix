@@ -44,6 +44,7 @@
       "audio"
       "video"
       "dialout"
+      "corectrl"
     ];
   };
 
@@ -63,9 +64,18 @@
     atuin
 
     # Nix tools
-    nixfmt-rfc-style
     nil
     alejandra
+
+    # Kubernetes
+    kubectl
+    kubernetes-helm
+    k9s
+    kubectx
+    kustomize
+    stern
+    kubeseal
+    nixfmt
   ];
 
   programs.gnupg.agent = {
@@ -73,12 +83,23 @@
     enableSSHSupport = true;
   };
 
+  services.tailscale.enable = true;
+
   nixpkgs.config.allowUnfree = true;
 
   services.udev.extraRules = ''
-      	SUBSYSTEM=="usb", ATTRS{idVendor}=="2886", MODE="0666"
-      	KERNEL=="hidraw", ATTRS{idVendor}=="2886", MODE="0666"
-    	SUBSYSTEM=="tty", ATTRS{idVendor}=="2886", MODE="0666"
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="2886", MODE="0666"
+    KERNEL=="hidraw", ATTRS{idVendor}=="2886", MODE="0666"
+    SUBSYSTEM=="tty", ATTRS{idVendor}=="2886", MODE="0666"
   '';
+
+  programs.ssh.extraConfig = ''
+    Host nix-builder
+      Hostname cybercat.home
+      User nix-builder
+      Port 2233
+  '';
+
   system.stateVersion = "25.11";
+  nix.package = pkgs.nixVersions.latest;
 }
