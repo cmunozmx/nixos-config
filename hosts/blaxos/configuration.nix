@@ -10,6 +10,7 @@
     ../../modules/common.nix
     ./hardware-configuration.nix
     ./hardware.nix
+    ./ryoku-prowl.nix
   ];
 
   # Boot splash: big NixOS logo instead of the firmware (Lenovo) BGRT logo
