@@ -10,6 +10,7 @@
     ../../modules/common.nix
     ./hardware-configuration.nix
     ./hardware.nix
+    ./ryoku-prowl.nix
   ];
 
   # Boot splash: big NixOS logo instead of the firmware (Lenovo) BGRT logo
@@ -19,11 +20,11 @@
     logo = "${pkgs.nixos-icons}/share/icons/hicolor/512x512/apps/nix-snowflake-white.png";
   };
   # Start plymouth early at native resolution
-  boot.initrd.systemd.enable = true;
+  #boot.initrd.systemd.enable = true;
   boot.initrd.kernelModules = [ "amdgpu" ];
+  #boot.initrd.verbose = false;
   # Silent boot so text doesn't cover the splash
   boot.consoleLogLevel = 3;
-  boot.initrd.verbose = false;
   boot.kernelParams = [
     "udev.log_level=3"
     "systemd.show_status=auto"
